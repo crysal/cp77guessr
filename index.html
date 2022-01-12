@@ -113,7 +113,7 @@ document.getElementsByClassName("next")[0].style.visibility = "visible"
 //REPLACE THIS WITH THE CALCULATION OF POINT VALUE BASED ON THE DISTACE FROM THE TARGET
 //AND STORE THE SCORE VALUE IN VAR guess1-5
 //ALSO CHANGE THE meter VALUE TO MATCH A REAL WORLD meter
-alert(movingmarker.getLatLng() + "that is " + Math.floor((map.distance(movingmarker.getLatLng(), DEBUGMarker.getLatLng()))/9000) + "Meters from the DEBUG POINT")
+alert(Math.floor((map.distance(movingmarker.getLatLng(), DEBUGMarker.getLatLng()))/9000) + " Meters from the location")
 };
 
 
