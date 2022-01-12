@@ -1,0 +1,146 @@
+<html>
+<head>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+	<style>
+	body {margin: 0; background: #000000;}
+	.leaflet-right {opacity:0.35;} /* Sorry, but it was annoyingly bright */
+	.container {width: 100%; height: 100%;}
+	.map {width: 75%; height: 98%; background: #000000; float: right;}
+	.bottom {background: #000000; color: orange; position: absolute; bottom: 0; left: 0; text-align: right; height: 2%;}
+	.guess {background: #FFFFFF; float: left; width: 25%; height: 98%; text-align: center;}
+	.cords {}
+	.changeMe{margin: 10px; width: 90%}
+	.guessbutton {margin: 10px; width: 90%;}
+	</style>
+	<title>Cyberpunk 2077 Guessr</title>
+</head>
+<body>
+<div id = "container">
+	<div id="guess" class="guess">
+		<br><br><h1>GUESS THIS LOCATION</h1>
+		<img class="changeMe" src="">
+		<button type="button" class="guessbutton guessb" onclick="guess()">Guess</button>
+		<button type="button" class="guessbutton next" onclick="nextGuess()" style="visibility: hidden">Next</button>
+	</div>
+	
+	<div id="map" class="map"></div>
+	<div id="bottom" class="bottom"><div id="cords" class="cords">CORDS HERE</div></div>
+</div>
+<script>
+//ALL CAPS COMMENTS ARE MOSTLY todo: STUFF
+//READ AT OWN DISCRETION
+//lower caps comments are explaining what it do
+
+//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp)
+//GUESS AND NEXT BUTTON IN THE SAME PLACE.
+//CHANGE THE MARKER ICON TO FIT THE CP77 STYLE. (https://leafletjs.com/reference.html#icon)
+//CHANGE THE GUESS AND NEXT BUTTON TO FIT THE CP77 STYLE.
+//CHANGE THE CSS TO FIT THE CP77 STYLE. JUST IN GENERAL GET EVERYTHIN MORE PRETTY
+//LOCK THE MAP-- THINK IT WAS CALLED BOUNDS(https://leafletjs.com/reference.html#bounds) SO YOU CAN'T ENDLESSLY DRAG TO THE SIDES.
+//THIS ONE FAR AWAY, BUT GET HIGHER QUALITY MAP, FOR EXTRA ZOOM LEVELS. CURRENTLY YOU CAN'T ZOOM TO SEE DETAILS NEEDED TO FIND LOCATIONS. THIS MIGHT REQUIRE RE-SETTING THE CORDS AS THE NEW MAP MIGHT BE OFFSET OR SOMETHING.
+//MAKE SCORING SYSTEM BASED ON THE DISTANCE, THEN STORE THEM IN THE guess1-5, DISPAY TOTAL SCORE AT THE END
+
+var guess1, guess2, guess3, guess4, guess5;
+var guessPolyline;
+var randomImageIndex;
+var DEBUGMarker;
+var latlngs;
+var randomCords;
+//when taking screenshots, please have good quality settings, fov max 75- or what ever fits enough clues to the location. remember to remove charcter in Poses, and set the distance thing(depth of field) to off. Recommend using Nvidias GeForceNow to achive high quality shots- when submitting name the screenshot the cords ("-6.184298596948494, -32.95896117874109.jpg") or push the correct syntax into 'js object literal' below.
+//when noting the cords please be as precise at possible you can drag the marker to get a better postition, then copy/paste the cords in the bottom left (you can't paste into GeForceNow)
+const locations=[{	
+	"name": "b1.jpg","xcords": '-6.184298596948494',"ycords": '-32.95896117874109'
+	},{
+	"name": "b2.jpg","xcords": '78.32283818180454',"ycords": '-38.58103845011877'
+	},{
+	"name": "b3.jpg","xcords": '77.34170551832501',"ycords": '-22.061961846793356'
+	},{
+	"name": "b4.jpg","xcords": '-48.22355324993529',"ycords": '32.17605264622922'
+	},{
+	"name": "b5.jpg","xcords": '73.25319140569951',"ycords": '-41.65639845605701'
+	},{
+	"name": "b6.jpg","xcords": '74.98217879952962',"ycords": '-46.14254333061164'
+	},{
+	"name": "b7.jpg","xcords": '-45.92049823882645',"ycords": '41.04500306190616'
+	},{
+	"name": "b8.jpg","xcords": '-38.6859449872268',"ycords": '2.5538849094418214'
+	},{
+	"name": "b9.jpg","xcords": '-45.490929846744663',"ycords": '40.913201918794535'
+	},{
+	"name": "b10.jpg","xcords": '-56.19448506936929',"ycords": '40.82516051811163'
+	},{
+	"name": "b11.jpg","xcords": '66.00007987055862',"ycords": '-16.65494868987529'
+}];
+var randomImageIndex = getRandomNumber(0, 10);
+var DEBUGMarker = L.marker([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
+document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
+
+//COMPLETED
+const map = L.map('map').setView([0,0], 3)
+L.tileLayer('MapTile/{z}/{x}/{y}.png', {
+minZoom: 2, maxZoom: 5,
+noWrap: true,
+}).addTo(map)
+
+//COMPLETED
+//puts players marker on the map and tracks the cords to the lower left, use this for getting the cords when taking screenshots.
+const movingmarker = L.marker([0, 0], {draggable: true,}).addTo(map)
+map.on('click', function(ev) {
+	document.getElementById("cords").innerHTML = ev.latlng.lat + "&nbsp;&nbsp;&nbsp;&nbsp;" + ev.latlng.lng;
+	movingmarker.setLatLng(ev.latlng);
+});
+movingmarker.on('dragend', function(eev){
+document.getElementById("cords").innerHTML =  movingmarker.getLatLng().lat + "&nbsp;&nbsp;&nbsp;&nbsp;" + movingmarker.getLatLng().lng;
+});
+
+//COMPLETED
+function getRandomNumber(min, max){
+ return Math.floor(Math.random() * (max - min) ) + min;
+};
+
+//NEEDS TO CALC SOME POINT VALVUES
+function guess(){
+//use this to calc the distance when guess is pressed, then render a line between them
+DEBUGMarker.addTo(map);
+var latlngs = [[movingmarker.getLatLng().lat,movingmarker.getLatLng().lng],[DEBUGMarker.getLatLng().lat,DEBUGMarker.getLatLng().lng]];
+guessPolyline = L.polyline(latlngs, {color: 'red', weight: 10}).addTo(map);
+map.fitBounds(guessPolyline.getBounds());
+//make the guess button hidden, so you can't hit it twice, then make the next button visible to clean up the map
+document.getElementsByClassName("guessb")[0].style.visibility = "hidden"
+document.getElementsByClassName("next")[0].style.visibility = "visible"
+
+//REPLACE THIS WITH THE CALCULATION OF POINT VALUE BASED ON THE DISTACE FROM THE TARGET
+//AND STORE THE SCORE VALUE IN VAR guess1-5
+//ALSO CHANGE THE meter VALUE TO MATCH A REAL WORLD meter
+alert(movingmarker.getLatLng() + "that is " + Math.floor((map.distance(movingmarker.getLatLng(), DEBUGMarker.getLatLng()))/9000) + "Meters from the DEBUG POINT")
+};
+
+
+//COMPLETED
+function nextGuess(){
+//clean up the map for next round
+DEBUGMarker.removeFrom(map);
+guessPolyline.removeFrom(map);
+changePic();
+movingmarker.setLatLng([0,0]);
+map.setView([0,0], 3);
+//reverse of line 94
+document.getElementsByClassName("guessb")[0].style.visibility = "visible"
+document.getElementsByClassName("next")[0].style.visibility = "hidden"
+};
+
+//COMPLETED
+function changePic(){
+var randomImageIndex = getRandomNumber(0, 10);
+//changes pic
+document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
+//change cords
+DEBUGMarker.setLatLng([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
+};
+
+
+
+</script>
+</body>
+</html>
