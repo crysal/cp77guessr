@@ -95,14 +95,13 @@ const locations=[{
 var randomImageIndex = getRandomNumber(0, 10);
 var DEBUGMarker = L.marker([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
-
 //COMPLETED loads the map
 const map = L.map('map').setView([0,0], 3)
 L.tileLayer('MapTile/{z}/{x}/{y}.png', {
 minZoom: 2, maxZoom: 5,
 noWrap: true,
 }).addTo(map)
-
+window.onload=magnify("myimage", 5);
 //lock the map (cant go far into black void)
 //COMPLETE
 var mapSW = [0, 8192], mapNE = [8192, 0];
@@ -169,6 +168,8 @@ var randomImageIndex = getRandomNumber(0, 10);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 //change cords
 DEBUGMarker.setLatLng([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
+zoomOut();
+magnify("myimage", 5);
 };
 
 //NEEDS A ROUND BASED SCORING + NEEDS HIGHER SCORE BASED ON DISTANCE, NOT JUST THE DISTANCE.
@@ -177,8 +178,15 @@ scoreNumber = (scoreNumber + newScore)
 document.getElementsByClassName("scoreNumbers")[0].innerHTML = scoreNumber
 };
 
+
+//removes the child
+function zoomOut() {
+   var zooms = document.querySelectorAll(".img-magnifier-glass");
+   for(var x=0;x<zooms.length;x++) {
+      zooms[x].parentNode.removeChild(zooms[x]);
+   }
+}
 //does the magnify thing, it works, but I dont like the offset of the glass from the mouse
-magnify("myimage", 5);
 function magnify(imgID, zoom) {
   var img, glass, w, h, bw, imgheight, imgwidth;
   img = document.getElementById(imgID);
