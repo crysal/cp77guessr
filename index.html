@@ -10,19 +10,36 @@
 	.bottom {background: #000000; color: orange; position: absolute; bottom: 0; left: 0; text-align: right; height: 2%;}
 	.guess {background: #FFFFFF; float: left; width: 25%; height: 98%; text-align: center;}
 	.cords {}
-	.changeMe{margin: 10px; width: 90%}
-	.guessbutton {margin: 10px; width: 90%;}
+	.changeMe{margin: 10px; width: 450; height: 253.13}
+	.guessbutton {margin: 10px; width: 90%; position: absolute; left: 10}
+	.buttons {height: 10%; width: 100%; position: relative;}
+	.score {width: 50%; font-size: 32}
+	
+	
+	* {box-sizing: border-box;}
+	.img-magnifier-container {position: relative;}
+	.img-magnifier-glass {position: absolute;border: 3px solid #000;border-radius: 50%;width: 100px;height: 100px;}
+	
 	</style>
 	<title>Cyberpunk 2077 Guessr</title>
 </head>
 <body>
 <div id = "container">
 	<div id="guess" class="guess">
-		<br><br><h1>GUESS THIS LOCATION</h1>
-		<img class="changeMe" src="">
-		<button type="button" class="guessbutton guessb" onclick="guess()">Guess</button>
-		<button type="button" class="guessbutton next" onclick="nextGuess()" style="visibility: hidden">Next</button>
+		<br><br><small>Endless mode, golf scoring</small><h1>GUESS THIS LOCATION</h1>
+		<div class="img-magnifier-container"><img class="changeMe" id="myimage" src=""></div>
+		<div class="buttons">
+			<button type="button" class="guessbutton guessb" onclick="guess()">Guess</button>
+			<button type="button" class="guessbutton next" onclick="nextGuess()" style="visibility: hidden">Next</button>
+		</div>
+			<div class="score" id="score" style="float: left">
+		<p>Your Score: </p><p class="scoreNumbers">0</p>
 	</div>
+	<div class="score" style="float: right">
+	<p>Round: <p><p class="roundNumber">0</p>
+	</div>
+	</div>
+
 	
 	<div id="map" class="map"></div>
 	<div id="bottom" class="bottom"><div id="cords" class="cords">CORDS HERE</div></div>
@@ -32,16 +49,18 @@
 //READ AT OWN DISCRETION
 //lower caps comments are explaining what it do
 
-//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp)
-//GUESS AND NEXT BUTTON IN THE SAME PLACE.
+//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp) (Meh I dont like the offset from where the mouse is, but it works)
+//GUESS AND NEXT BUTTON IN THE SAME PLACE. (COMPLETED, BUT VERY JANKY. NEEDS BETTER SOLUTION)
 //CHANGE THE MARKER ICON TO FIT THE CP77 STYLE. (https://leafletjs.com/reference.html#icon)
 //CHANGE THE GUESS AND NEXT BUTTON TO FIT THE CP77 STYLE.
 //CHANGE THE CSS TO FIT THE CP77 STYLE. JUST IN GENERAL GET EVERYTHIN MORE PRETTY
-//LOCK THE MAP-- THINK IT WAS CALLED BOUNDS(https://leafletjs.com/reference.html#bounds) SO YOU CAN'T ENDLESSLY DRAG TO THE SIDES.
 //THIS ONE FAR AWAY, BUT GET HIGHER QUALITY MAP, FOR EXTRA ZOOM LEVELS. CURRENTLY YOU CAN'T ZOOM TO SEE DETAILS NEEDED TO FIND LOCATIONS. THIS MIGHT REQUIRE RE-SETTING THE CORDS AS THE NEW MAP MIGHT BE OFFSET OR SOMETHING.
-//MAKE SCORING SYSTEM BASED ON THE DISTANCE, THEN STORE THEM IN THE guess1-5, DISPAY TOTAL SCORE AT THE END
+//MAKE SCORING SYSTEM BASED ON THE DISTANCE, THEN STORE THEM IN THE guess1-5, DISPAY TOTAL SCORE AT THE END (Currently endless mode, score is golf like, lower score = better.)
 
 var guess1, guess2, guess3, guess4, guess5;
+var roundNumber = 0;
+var scoreNumber = 0;
+var newScore, distanceF;
 var guessPolyline;
 var randomImageIndex;
 var DEBUGMarker;
@@ -72,19 +91,27 @@ const locations=[{
 	},{
 	"name": "b11.jpg","xcords": '66.00007987055862',"ycords": '-16.65494868987529'
 }];
+//gets a random number and picks image+cords to load
 var randomImageIndex = getRandomNumber(0, 10);
 var DEBUGMarker = L.marker([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 
-//COMPLETED
+//COMPLETED loads the map
 const map = L.map('map').setView([0,0], 3)
 L.tileLayer('MapTile/{z}/{x}/{y}.png', {
 minZoom: 2, maxZoom: 5,
 noWrap: true,
 }).addTo(map)
 
-//COMPLETED
-//puts players marker on the map and tracks the cords to the lower left, use this for getting the cords when taking screenshots.
+//lock the map (cant go far into black void)
+//COMPLETE
+var mapSW = [0, 8192], mapNE = [8192, 0];
+map.setMaxBounds(new L.LatLngBounds(
+	map.unproject(mapSW, map.getMaxZoom()),
+	map.unproject(mapNE, map.getMaxZoom())
+));
+
+//COMPLETED puts players marker on the map and tracks the cords to the lower left, use this for getting the cords when taking screenshots.
 const movingmarker = L.marker([0, 0], {draggable: true,}).addTo(map)
 map.on('click', function(ev) {
 	document.getElementById("cords").innerHTML = ev.latlng.lat + "&nbsp;&nbsp;&nbsp;&nbsp;" + ev.latlng.lng;
@@ -94,7 +121,7 @@ movingmarker.on('dragend', function(eev){
 document.getElementById("cords").innerHTML =  movingmarker.getLatLng().lat + "&nbsp;&nbsp;&nbsp;&nbsp;" + movingmarker.getLatLng().lng;
 });
 
-//COMPLETED
+//COMPLETED makes the random number
 function getRandomNumber(min, max){
  return Math.floor(Math.random() * (max - min) ) + min;
 };
@@ -113,7 +140,10 @@ document.getElementsByClassName("next")[0].style.visibility = "visible"
 //REPLACE THIS WITH THE CALCULATION OF POINT VALUE BASED ON THE DISTACE FROM THE TARGET
 //AND STORE THE SCORE VALUE IN VAR guess1-5
 //ALSO CHANGE THE meter VALUE TO MATCH A REAL WORLD meter
-alert(Math.floor((map.distance(movingmarker.getLatLng(), DEBUGMarker.getLatLng()))/9000) + " Meters from the location")
+distanceF = Math.floor((map.distance(movingmarker.getLatLng(), DEBUGMarker.getLatLng()))/9000);
+alert((distanceF) + " Meters from the location")
+newScore = distanceF
+addToScore();
 };
 
 
@@ -125,12 +155,14 @@ guessPolyline.removeFrom(map);
 changePic();
 movingmarker.setLatLng([0,0]);
 map.setView([0,0], 3);
-//reverse of line 94
+//reverse of line guess()
 document.getElementsByClassName("guessb")[0].style.visibility = "visible"
 document.getElementsByClassName("next")[0].style.visibility = "hidden"
+roundNumber=(roundNumber+1)
+document.getElementsByClassName("roundNumber")[0].innerHTML = roundNumber
 };
 
-//COMPLETED
+//COMPLETED reruns the genertate random number and pick img+cords from start of script
 function changePic(){
 var randomImageIndex = getRandomNumber(0, 10);
 //changes pic
@@ -139,7 +171,77 @@ document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[rand
 DEBUGMarker.setLatLng([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
 };
 
+//NEEDS A ROUND BASED SCORING + NEEDS HIGHER SCORE BASED ON DISTANCE, NOT JUST THE DISTANCE.
+function addToScore(){
+scoreNumber = (scoreNumber + newScore)
+document.getElementsByClassName("scoreNumbers")[0].innerHTML = scoreNumber
+};
 
+//does the magnify thing, it works, but I dont like the offset of the glass from the mouse
+magnify("myimage", 5);
+function magnify(imgID, zoom) {
+  var img, glass, w, h, bw, imgheight, imgwidth;
+  img = document.getElementById(imgID);
+  //width: 450; height: 253.13
+  imgheight = 253.13;
+  imgwidth = 450;
+
+  /* Create magnifier glass: */
+  glass = document.createElement("DIV");
+  glass.setAttribute("class", "img-magnifier-glass");
+
+  /* Insert magnifier glass: */
+  img.parentElement.insertBefore(glass, img);
+
+  /* Set background properties for the magnifier glass: */
+  glass.style.backgroundImage = "url('" + img.src + "')";
+  glass.style.backgroundRepeat = "no-repeat";
+  glass.style.backgroundSize = (imgwidth * zoom) + "px " + (imgheight * zoom) + "px";
+  bw = 3;
+  w = glass.offsetWidth / 2;
+  h = glass.offsetHeight / 2;
+
+  /* Execute a function when someone moves the magnifier glass over the image: */
+  glass.addEventListener("mousemove", moveMagnifier);
+  img.addEventListener("mousemove", moveMagnifier);
+
+  /*and also for touch screens:*/
+  glass.addEventListener("touchmove", moveMagnifier);
+  img.addEventListener("touchmove", moveMagnifier);
+  function moveMagnifier(e) {
+    var pos, x, y;
+    /* Prevent any other actions that may occur when moving over the image */
+    e.preventDefault();
+    /* Get the cursor's x and y positions: */
+    pos = getCursorPos(e);
+    x = pos.x;
+    y = pos.y;
+    /* Prevent the magnifier glass from being positioned outside the image: */
+    if (x > imgwidth - (w / zoom)) {x = imgwidth - (w / zoom);}
+    if (x < w / zoom) {x = w / zoom;}
+    if (y > imgheight - (h / zoom)) {y = imgheight - (h / zoom);}
+    if (y < h / zoom) {y = h / zoom;}
+    /* Set the position of the magnifier glass: */
+    glass.style.left = (x - w) + "px";
+    glass.style.top = (y - h) + "px";
+    /* Display what the magnifier glass "sees": */
+    glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
+  }
+
+  function getCursorPos(e) {
+    var a, x = 0, y = 0;
+    e = e || window.event;
+    /* Get the x and y positions of the image: */
+    a = img.getBoundingClientRect();
+    /* Calculate the cursor's x and y coordinates, relative to the image: */
+    x = e.pageX - a.left;
+    y = e.pageY - a.top;
+    /* Consider any page scrolling: */
+    x = x - window.pageXOffset;
+    y = y - window.pageYOffset;
+    return {x : x, y : y};
+  }
+}
 
 </script>
 </body>
