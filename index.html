@@ -92,9 +92,21 @@ const locations=[{
 	"name": "b10.jpg","xcords": '-56.19448506936929',"ycords": '40.82516051811163'
 	},{
 	"name": "b11.jpg","xcords": '66.00007987055862',"ycords": '-16.65494868987529'
+	},{
+	"name": "b12.jpg","xcords": '68.46380232109286',"ycords": '-24.389638050358876'
+	},{
+	"name": "b13.jpg","xcords": '50.2893440672666',"ycords": '10.678700550358894'
+	},{
+	"name": "b14.jpg","xcords": '62.59326736177038',"ycords": '-26.279332735785268'
+	},{
+	"name": "b15.jpg","xcords": '52.50970903090607',"ycords": '-11.207924372901442'
+	},{
+	"name": "b16.jpg","xcords": '45.42930930804961',"ycords": '13.93067444964111'
+	},{
+	"name": "b17.jpg","xcords": '30.00171335691268',"ycords": '-1.4046950924855353'
 }];
 //gets a random number and picks image+cords to load
-var randomImageIndex = getRandomNumber(0, 10);
+var randomImageIndex = getRandomNumber(0, 16);
 var DEBUGMarker = L.marker([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 //COMPLETED loads the map
