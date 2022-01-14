@@ -29,7 +29,7 @@
 <div id = "container">
 	<div id="guess" class="guess">
 		<br><br><small>Endless mode, golf scoring</small><h1>GUESS THIS LOCATION</h1>
-		<div class="img-magnifier-container"><img class="changeMe" id="myimage" src=""></div>
+		<div class="img-magnifier-container"><img class="changeMe" id="myimage" src="" onmouseover='magnify("myimage", 5)'></div>
 		<div class="buttons">
 			<button type="button" class="guessbutton guessb" onclick="guess()">Guess</button>
 			<button type="button" class="guessbutton next" onclick="nextGuess()" style="visibility: hidden">Next</button>
@@ -51,7 +51,7 @@
 //READ AT OWN DISCRETION
 //lower caps comments are explaining what it do
 
-//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp) (now works with % but for somereason the first image loaded does not want to give H/W to the function)
+//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp) (need to find dynamic so the image can be % instead of px)
 //GUESS AND NEXT BUTTON IN THE SAME PLACE. (COMPLETED, BUT VERY JANKY. NEEDS BETTER SOLUTION)
 //CHANGE THE MARKER ICON TO FIT THE CP77 STYLE. (https://leafletjs.com/reference.html#icon)
 //CHANGE THE GUESS AND NEXT BUTTON TO FIT THE CP77 STYLE.
@@ -111,7 +111,8 @@ map.setMaxBounds(new L.LatLngBounds(
 	map.unproject(mapNE, map.getMaxZoom())
 ));
 
-window.onload=magnify("myimage", 5);
+//window.onload=magnify("myimage", 5);
+//window.onload=nextGuess();
 
 //COMPLETED puts players marker on the map and tracks the cords to the lower left, use this for getting the cords when taking screenshots.
 const movingmarker = L.marker([0, 0], {draggable: true,}).addTo(map)
@@ -190,7 +191,10 @@ function zoomOut() {
 
 
 //does the magnify thing, it works, but I dont like the offset of the glass from the mouse
+
+
 function magnify(imgID, zoom) {
+zoomOut()
   var img, glass, w, h, bw;
   img = document.getElementById(imgID);
 
