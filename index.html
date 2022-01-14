@@ -1,16 +1,17 @@
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 	<style>
 	body {margin: 0; background: #000000;}
 	.leaflet-right {opacity:0.35;} /* Sorry, but it was annoyingly bright */
 	.container {width: 100%; height: 100%;}
-	.map {width: 75%; height: 98%; background: #000000; float: right;}
+	.map {width: 67%; height: 98%; background: #000000; float: right;}
 	.bottom {background: #000000; color: orange; position: absolute; bottom: 0; left: 0; text-align: right; height: 2%;}
-	.guess {background: #FFFFFF; float: left; width: 25%; height: 98%; text-align: center;}
+	.guess {background: #FFFFFF; float: left; width: 33%; height: 98%; text-align: center;}
 	.cords {}
-	.changeMe{margin: 10px; width: 450; height: 253.13}
+	.changeMe{margin: 10px; width: 90%;}
 	.guessbutton {margin: 10px; width: 90%; position: absolute; left: 10}
 	.buttons {height: 10%; width: 100%; position: relative;}
 	.score {width: 50%; font-size: 32}
@@ -19,6 +20,7 @@
 	* {box-sizing: border-box;}
 	.img-magnifier-container {position: relative;}
 	.img-magnifier-glass {position: absolute;border: 3px solid #000;border-radius: 50%;width: 100px;height: 100px;}
+	
 	
 	</style>
 	<title>Cyberpunk 2077 Guessr</title>
@@ -49,7 +51,7 @@
 //READ AT OWN DISCRETION
 //lower caps comments are explaining what it do
 
-//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp) (Meh I dont like the offset from where the mouse is, but it works)
+//GET THAT FANCY HOVER TO ZOOM FEATURE ON THE IMAGE. (https://www.w3schools.com/howto/howto_js_image_magnifier_glass.asp) (now works with % but for somereason the first image loaded does not want to give H/W to the function)
 //GUESS AND NEXT BUTTON IN THE SAME PLACE. (COMPLETED, BUT VERY JANKY. NEEDS BETTER SOLUTION)
 //CHANGE THE MARKER ICON TO FIT THE CP77 STYLE. (https://leafletjs.com/reference.html#icon)
 //CHANGE THE GUESS AND NEXT BUTTON TO FIT THE CP77 STYLE.
@@ -101,7 +103,6 @@ L.tileLayer('MapTile/{z}/{x}/{y}.png', {
 minZoom: 2, maxZoom: 5,
 noWrap: true,
 }).addTo(map)
-window.onload=magnify("myimage", 5);
 //lock the map (cant go far into black void)
 //COMPLETE
 var mapSW = [0, 8192], mapNE = [8192, 0];
@@ -109,6 +110,8 @@ map.setMaxBounds(new L.LatLngBounds(
 	map.unproject(mapSW, map.getMaxZoom()),
 	map.unproject(mapNE, map.getMaxZoom())
 ));
+
+window.onload=magnify("myimage", 5);
 
 //COMPLETED puts players marker on the map and tracks the cords to the lower left, use this for getting the cords when taking screenshots.
 const movingmarker = L.marker([0, 0], {draggable: true,}).addTo(map)
@@ -145,7 +148,6 @@ newScore = distanceF
 addToScore();
 };
 
-
 //COMPLETED
 function nextGuess(){
 //clean up the map for next round
@@ -159,6 +161,8 @@ document.getElementsByClassName("guessb")[0].style.visibility = "visible"
 document.getElementsByClassName("next")[0].style.visibility = "hidden"
 roundNumber=(roundNumber+1)
 document.getElementsByClassName("roundNumber")[0].innerHTML = roundNumber
+zoomOut()
+magnify("myimage", 5)
 };
 
 //COMPLETED reruns the genertate random number and pick img+cords from start of script
@@ -168,8 +172,6 @@ var randomImageIndex = getRandomNumber(0, 10);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 //change cords
 DEBUGMarker.setLatLng([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
-zoomOut();
-magnify("myimage", 5);
 };
 
 //NEEDS A ROUND BASED SCORING + NEEDS HIGHER SCORE BASED ON DISTANCE, NOT JUST THE DISTANCE.
@@ -178,7 +180,6 @@ scoreNumber = (scoreNumber + newScore)
 document.getElementsByClassName("scoreNumbers")[0].innerHTML = scoreNumber
 };
 
-
 //removes the child
 function zoomOut() {
    var zooms = document.querySelectorAll(".img-magnifier-glass");
@@ -186,13 +187,12 @@ function zoomOut() {
       zooms[x].parentNode.removeChild(zooms[x]);
    }
 }
+
+
 //does the magnify thing, it works, but I dont like the offset of the glass from the mouse
 function magnify(imgID, zoom) {
-  var img, glass, w, h, bw, imgheight, imgwidth;
+  var img, glass, w, h, bw;
   img = document.getElementById(imgID);
-  //width: 450; height: 253.13
-  imgheight = 253.13;
-  imgwidth = 450;
 
   /* Create magnifier glass: */
   glass = document.createElement("DIV");
@@ -204,7 +204,7 @@ function magnify(imgID, zoom) {
   /* Set background properties for the magnifier glass: */
   glass.style.backgroundImage = "url('" + img.src + "')";
   glass.style.backgroundRepeat = "no-repeat";
-  glass.style.backgroundSize = (imgwidth * zoom) + "px " + (imgheight * zoom) + "px";
+  glass.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
   bw = 3;
   w = glass.offsetWidth / 2;
   h = glass.offsetHeight / 2;
@@ -225,9 +225,9 @@ function magnify(imgID, zoom) {
     x = pos.x;
     y = pos.y;
     /* Prevent the magnifier glass from being positioned outside the image: */
-    if (x > imgwidth - (w / zoom)) {x = imgwidth - (w / zoom);}
+    if (x > img.width - (w / zoom)) {x = img.width - (w / zoom);}
     if (x < w / zoom) {x = w / zoom;}
-    if (y > imgheight - (h / zoom)) {y = imgheight - (h / zoom);}
+    if (y > img.height - (h / zoom)) {y = img.height - (h / zoom);}
     if (y < h / zoom) {y = h / zoom;}
     /* Set the position of the magnifier glass: */
     glass.style.left = (x - w) + "px";
@@ -250,6 +250,7 @@ function magnify(imgID, zoom) {
     return {x : x, y : y};
   }
 }
+
 
 </script>
 </body>
