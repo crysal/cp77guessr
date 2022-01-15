@@ -249,7 +249,11 @@ zoomOut()
     return {x : x, y : y};
   }
 }
-
+//adds a maker on all locations, used to find good new locations 
+function locationsdebug(){
+for ( let xxx = 0; xxx < locations.length; xxx++){
+  L.marker([locations[xxx].xcords, locations[xxx].ycords]).addTo(map);
+}}
 
 </script>
 </body>
