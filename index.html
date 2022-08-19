@@ -28,17 +28,18 @@
 <body>
 <div id = "container">
 	<div id="guess" class="guess">
-		<br><br><small>Endless mode, golf scoring</small><h1>GUESS THIS LOCATION</h1>
+		<br><br><h1>GUESS THIS LOCATION</h1>
 		<div class="img-magnifier-container"><img class="changeMe" id="myimage" src="" onmouseover='magnify("myimage", 5)'></div>
 		<div class="buttons">
 			<button type="button" class="guessbutton guessb" onclick="guess()">Guess</button>
 			<button type="button" class="guessbutton next" onclick="nextGuess()" style="visibility: hidden">Next</button>
 		</div>
+		<div class="roundPoints"></div> <!--Shows score below buttons, instead of js-Alert-->
 			<div class="score" id="score" style="float: left">
 		<p>Your Score: </p><p class="scoreNumbers">0</p>
 	</div>
 	<div class="score" style="float: right">
-	<p>Round: <p><p class="roundNumber">0</p>
+	<p>Round: <p><p class="roundNumber">1</p>
 	</div>
 	</div>
 
@@ -60,7 +61,7 @@
 //MAKE SCORING SYSTEM BASED ON THE DISTANCE, THEN STORE THEM IN THE guess1-5, DISPAY TOTAL SCORE AT THE END (Currently endless mode, score is golf like, lower score = better.)
 
 var guess1, guess2, guess3, guess4, guess5;
-var roundNumber = 0;
+var roundNumber = 1;
 var scoreNumber = 0;
 var newScore, distanceF;
 var guessPolyline;
@@ -68,6 +69,7 @@ var randomImageIndex;
 var DEBUGMarker;
 var latlngs;
 var randomCords;
+const guessedLocations = [];
 //when taking screenshots, please have good quality settings, fov max 75- or what ever fits enough clues to the location. remember to remove charcter in Poses, and set the distance thing(depth of field) to off. Recommend using Nvidias GeForceNow to achive high quality shots- when submitting name the screenshot the cords ("-6.184298596948494, -32.95896117874109.jpg") or push the correct syntax into 'js object literal' below.
 //when noting the cords please be as precise at possible you can drag the marker to get a better postition, then copy/paste the cords in the bottom left (you can't paste into GeForceNow)
 const locations=[{	
@@ -94,12 +96,12 @@ var randomImageIndex = getRandomNumber(0, 16);
 var DEBUGMarker = L.marker([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 //COMPLETED loads the map
-const map = L.map('map').setView([0,0], 3)
+const map = L.map('map').setView([0,0], 3) //WHEN THE MAP IS UPDATED, REMEMBER TO CHANGE THIS NUMBER TO FIT THE NEW ZOOM LEVELS (think the new number is 16. but not totes sure.)
 L.tileLayer('MapTile/{z}/{x}/{y}.png', {
 minZoom: 2, maxZoom: 5,
 noWrap: true,
 }).addTo(map)
-//lock the map (cant go far into black void)
+//lock the map (cant go far into black void) //WHEN THE MAP IS UPDATED, REMEMBER TO CHANGE THIS NUMBER TO FIT THE PIXELS OF THE NEW SIZE PLZ!!!!
 //COMPLETE
 var mapSW = [0, 8192], mapNE = [8192, 0];
 map.setMaxBounds(new L.LatLngBounds(
@@ -140,7 +142,8 @@ document.getElementsByClassName("next")[0].style.visibility = "visible"
 //AND STORE THE SCORE VALUE IN VAR guess1-5
 //ALSO CHANGE THE meter VALUE TO MATCH A REAL WORLD meter
 distanceF = Math.floor((map.distance(movingmarker.getLatLng(), DEBUGMarker.getLatLng()))/9000);
-alert((distanceF) + " Meters from the location")
+//alert((distanceF) + " Meters from the location") /// Removed the alert function that would show the score of the round, replaced with display above total score
+document.getElementsByClassName("roundPoints")[0].innerHTML = (distanceF) + " Meters from the location"
 newScore = distanceF
 addToScore();
 };
@@ -153,27 +156,45 @@ guessPolyline.removeFrom(map);
 changePic();
 movingmarker.setLatLng([0,0]);
 map.setView([0,0], 3);
+if (roundNumber==5)
+{
+//replace with new button that says try again, that reloads the page
+alert( "Game over, your score is: "+scoreNumber )
+location.reload()
+}
 //reverse of line guess()
 document.getElementsByClassName("guessb")[0].style.visibility = "visible"
 document.getElementsByClassName("next")[0].style.visibility = "hidden"
 roundNumber=(roundNumber+1)
 document.getElementsByClassName("roundNumber")[0].innerHTML = roundNumber
 zoomOut()
+document.getElementsByClassName("roundPoints")[0].innerHTML = ""
 };
 
 //COMPLETED reruns the genertate random number and pick img+cords from start of script
 function changePic(){
 var randomImageIndex = getRandomNumber(0, 16);
+//Check if the location has been showed before, else display the new location and said location to the seenbefore list.
+//Meh it works, if you do more than the $locations number, it will inf loop and crash.. gotta make something to only do 5 rounds then reload or something.
+if (guessedLocations.includes(randomImageIndex))
+{
+	console.log("Wait?!? I've seen this before.")
+	changePic()
+} else {
+
 //changes pic
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 //change cords
 DEBUGMarker.setLatLng([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
-};
+
+guessedLocations.push(randomImageIndex)
+}};
 
 //NEEDS A ROUND BASED SCORING + NEEDS HIGHER SCORE BASED ON DISTANCE, NOT JUST THE DISTANCE.
 function addToScore(){
 scoreNumber = (scoreNumber + newScore)
 document.getElementsByClassName("scoreNumbers")[0].innerHTML = scoreNumber
+
 };
 
 //removes the child
