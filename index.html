@@ -89,10 +89,29 @@ const locations=[{
 	"name": "b14.jpg","xcords": '62.59326736177038',"ycords": '-26.279332735785268'	},{
 	"name": "b15.jpg","xcords": '52.50970903090607',"ycords": '-11.207924372901442'	},{
 	"name": "b16.jpg","xcords": '45.42930930804961',"ycords": '13.93067444964111'	},{
-	"name": "b17.jpg","xcords": '30.00171335691268',"ycords": '-1.4046950924855353'
+	"name": "b17.jpg","xcords": '30.00171335691268',"ycords": '-1.4046950924855353'	},{
+	"name": "b18.jpg","xcords": '8.494067277500374',"ycords": '17.753854314294426'	},{
+	"name": "b19.jpg","xcords": '9.40575464175869',"ycords": '60.95214843750001'	},{
+	"name": "b20.jpg","xcords": '11.60757706928602',"ycords": '49.043664688454996'	},{
+	"name": "b21.jpg","xcords": '-11.867343537845398',"ycords": '0.7470806996411073'	},{
+	"name": "b22.jpg","xcords": '18.354790128530997',"ycords": '-11.904578183984219'	},{
+	"name": "b23.jpg","xcords": '20.138463238438003',"ycords": '46.01057599324209'	},{
+	"name": "b24.jpg","xcords": '-22.833001649894964',"ycords": '-45.4766156343492'	},{
+	"name": "b25.jpg","xcords": '23.24135994883714',"ycords": '-41.57226562500001'	},{
+	"name": "b26.jpg","xcords": '-23.600968476294724',"ycords": '-60.637426445474524'	},{
+	"name": "b27.jpg","xcords": '-25.639101376854743',"ycords": '31.46726395388075'	},{
+	"name": "b28.jpg","xcords": '31.128199299111984',"ycords": '86.92383851214112'	},{
+	"name": "b29.jpg","xcords": '-34.92200192570593',"ycords": '-69.78514586285888'	},{
+	"name": "b30.jpg","xcords": '-35.60353495596446',"ycords": '100.19527095143555'	},{
+	"name": "b31.jpg","xcords": '36.9867785683942',"ycords": '-39.326536281113185'	},{
+	"name": "b32.jpg","xcords": '56.072048088208746',"ycords": '-0.48338805035887283'	},{
+	"name": "b33.jpg","xcords": '59.288343236286856',"ycords": '24.12598694964111'	},{
+	"name": "b34.jpg","xcords": '60.348546523083066',"ycords": '-26.63083860071777'	},{
+	"name": "b35.jpg","xcords": '63.450502482458845',"ycords": '-35.41993226214113'	},{
+	"name": "b36.jpg","xcords": '65.85677188818934',"ycords": '-51.67968750000001'
 }];
 //gets a random number and picks image+cords to load
-var randomImageIndex = getRandomNumber(0, 16);
+var randomImageIndex = getRandomNumber(0, 35);
 var DEBUGMarker = L.marker([locations[randomImageIndex].xcords, locations[randomImageIndex].ycords]);
 document.getElementsByClassName("changeme")[0].src = "Locations/"+locations[randomImageIndex].name;
 //COMPLETED loads the map
@@ -173,7 +192,7 @@ document.getElementsByClassName("roundPoints")[0].innerHTML = ""
 
 //COMPLETED reruns the genertate random number and pick img+cords from start of script
 function changePic(){
-var randomImageIndex = getRandomNumber(0, 16);
+var randomImageIndex = getRandomNumber(0, 35);
 //Check if the location has been showed before, else display the new location and said location to the seenbefore list.
 //Meh it works, if you do more than the $locations number, it will inf loop and crash.. gotta make something to only do 5 rounds then reload or something.
 if (guessedLocations.includes(randomImageIndex))
